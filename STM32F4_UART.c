@@ -250,24 +250,38 @@ ErrorStatus usartGetC(USART_TypeDef * USARTx, char* c)
 ErrorStatus usartPutC(USART_TypeDef * USARTx, unsigned char c)
 {
 	int ticks = NumberOfTicks;
-	uint32_t cr3 = USARTx->CR3;
 	USARTx->DR = c;
-//	if (READ_BIT(cr3, USART_CR3_HDSEL))
-		USARTx->CR1 &= ~ USART_CR1_RE;
-		
 	// Wait for transmitter's flag
 		while (!(USARTx->SR & USART_SR_TC) )
 		{
-//				ticks--;
-//				if (ticks == 0)
-//				{
-//					return ERROR;
-//				}
+			ticks--;
+			if (ticks == 0)
+			{
+				return ERROR;
+			}
 		}
-//	if (READ_BIT(cr3, USART_CR3_HDSEL))
-		USARTx->CR1 |= USART_CR1_RE;
 	return SUCCESS;
 }
+
+// Write one char to USART without echo (usefull when TX and RX are connected)
+ErrorStatus usartPutCharNoEcho(USART_TypeDef * USARTx, unsigned char c)
+{
+	int ticks = NumberOfTicks;
+	USARTx->DR = c;
+	USARTx->CR1 &= ~ USART_CR1_RE;
+	// Wait for transmitter's flag
+		while (!(USARTx->SR & USART_SR_TC) )
+		{
+			ticks--;
+			if (ticks == 0)
+			{
+				return ERROR;
+			}
+		}
+	USARTx->CR1 |= USART_CR1_RE;
+	return SUCCESS;
+}
+
 // Write string to the USART
 ErrorStatus usartPutStr(USART_TypeDef * USARTx, const char *str)
 {

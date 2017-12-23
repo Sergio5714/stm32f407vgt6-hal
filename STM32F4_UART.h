@@ -61,6 +61,9 @@ ErrorStatus usartGetC(USART_TypeDef * USARTx, char* c);
 
 // Write one char to USART
 ErrorStatus usartPutC(USART_TypeDef * USARTx, unsigned char c);
+
+// Write one char to USART without echo (usefull when TX and RX are connected)
+ErrorStatus usartPutCharNoEcho(USART_TypeDef * USARTx, unsigned char c);
 	
 // Write string to the USART
 ErrorStatus usartPutStr(USART_TypeDef * USARTx, const char *str);

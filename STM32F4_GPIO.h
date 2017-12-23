@@ -27,44 +27,50 @@ typedef enum
 // GPIO mode
 typedef enum
 {
-  GPIO_MODE_IN  = 0x00, // GPIO Input Mode
-  GPIO_MODE_OUT = 0x01, // GPIO Output Mode
-  GPIO_MODE_AF  = 0x02, // GPIO Alternate function Mode
-  GPIO_MODE_AN  = 0x03  // GPIO Analog Mode
+	GPIO_MODE_IN  = 0x00, // GPIO Input Mode
+	GPIO_MODE_OUT = 0x01, // GPIO Output Mode
+	GPIO_MODE_AF  = 0x02, // GPIO Alternate function Mode
+	GPIO_MODE_AN  = 0x03  // GPIO Analog Mode
 }GPIO_Mode_TypeDef;
 
 // GPIO output mode type
 typedef enum
 { 
 	// Push - pull mode
-  GPIO_OUTPUT_MODE_PP = 0x00,
+	GPIO_OUTPUT_MODE_PP = 0x00,
 	// Open drain mode
-  GPIO_OUTPUT_MODE_OD = 0x01  
+	GPIO_OUTPUT_MODE_OD = 0x01  
 }GPIO_Output_Mode_TypeDef;
 
 // GPIO pull up, pull down mode
 typedef enum
 { 
-  GPIO_PUPD_NOPULL = 0x00,
-  GPIO_PUPD_UP     = 0x01,
-  GPIO_PUPD_DOWN   = 0x02
+	GPIO_PUPD_NOPULL = 0x00,
+	GPIO_PUPD_UP     = 0x01,
+	GPIO_PUPD_DOWN   = 0x02
 }GPIO_PuPd_TypeDef;
 
 // GPIO output level 
 typedef enum
 { 
-  GPIO_LEVEL_LOW  = 0x00,
-  GPIO_LEVEL_HIGH = 0x01
+	GPIO_LEVEL_LOW  = 0x00,
+	GPIO_LEVEL_HIGH = 0x01
 }GPIO_Level_TypeDef;
 
 // Struct for GPIO pin initialization
 typedef struct
 {             
-  GPIO_Mode_TypeDef        GPIO_Mode;      
-  GPIO_Output_Mode_TypeDef GPIO_Output_Mode;
+	GPIO_Mode_TypeDef        GPIO_Mode;      
+	GPIO_Output_Mode_TypeDef GPIO_Output_Mode;
 	GPIO_PuPd_TypeDef        GPIO_PuPd_Mode;
 }GPIO_Init_TypeDef;
 
+// Struct for GPIO pin
+typedef struct
+{             
+	GPIO_TypeDef*           port;
+	GPIO_Pin_Number_Typedef number;
+}GPIO_Pin_TypeDef;
 
 // Macros for alternative functions
 // AF 1 selection     

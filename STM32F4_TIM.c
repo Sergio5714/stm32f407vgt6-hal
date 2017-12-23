@@ -33,7 +33,7 @@ void timSetOnePulseMode(TIM_TypeDef* TIMx)
 //-------------------------------------- PWM mode --------------------------------------//
 
 // PWM mode 1
-void timInitPwm(TIM_TypeDef* TIMx, TIM_Init_Typedef* TIM_Init, float* dutyCycle, int* channels)
+void timInitPwm(TIM_TypeDef* TIMx, TIM_Init_Typedef* TIM_Init, float dutyCycle[4], uint8_t channels[4])
 {
 	// Timer Base initialization
 	TIM_Init->TIM_Dir = TIM_DIR_UPCOUNTER;
@@ -87,30 +87,30 @@ void timInitPwm(TIM_TypeDef* TIMx, TIM_Init_Typedef* TIM_Init, float* dutyCycle,
 }
 
 // Change PWM duty cycle "on fly"
-void timPwmChangeDutyCycle(TIM_TypeDef* TIMx, float dutyCycle, int channel)
+void timPwmChangeDutyCycle(TIM_TypeDef* TIMx, uint8_t channel, float dutyCycle)
 {
 	if (channel == TIM_PWM_CHANNEL_1)
 	{
 		TIMx->CCR1 = (TIMx->ARR) * (dutyCycle);
-		//return;
+		return;
 	}
 	
 	if (channel == TIM_PWM_CHANNEL_2)
 	{
 		TIMx->CCR2 = (TIMx->ARR) * (dutyCycle);
-		//return;
+		return;
 	}
 	
 	if (channel == TIM_PWM_CHANNEL_3)
 	{
 		TIMx->CCR3 = (TIMx->ARR) * (dutyCycle);
-		//return;
+		return;
 	}
 	
 	if (channel == TIM_PWM_CHANNEL_4)
 	{
 		TIMx->CCR4 = (TIMx->ARR) * (dutyCycle);
-		//return;
+		return;
 	}
 	// Generate update event to transfer all values from shadow registers to real ones
 	TIMx->EGR  = TIM_EGR_UG;
@@ -142,6 +142,16 @@ void timInitEncoder(TIM_TypeDef* TIMx)
 
 
 //------------------------- Common functions for different modes -----------------------//
+
+// Get default struct for initialization
+TIM_Init_Typedef timGetInitStruct(void)
+{
+	TIM_Init_Typedef settings;
+	settings.TIM_Dir = TIM_DIR_UPCOUNTER;
+	settings.TIM_Period = 0xFFFF;
+	settings.TIM_Prescaler = 1;
+	return settings;
+}
 
 // Initialization of clocking
 void timInitClock(TIM_TypeDef* TIMx)
