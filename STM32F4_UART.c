@@ -250,6 +250,8 @@ ErrorStatus usartGetC(USART_TypeDef * USARTx, char* c)
 ErrorStatus usartPutC(USART_TypeDef * USARTx, unsigned char c)
 {
 	int ticks = NumberOfTicks;
+	// Clear "transmission complete" flag
+	USARTx->SR &= ~USART_SR_TC;
 	USARTx->DR = c;
 	// Wait for transmitter's flag
 		while (!(USARTx->SR & USART_SR_TC) )
@@ -314,21 +316,21 @@ ErrorStatus usartPutNumberInASCII(USART_TypeDef * USARTx, uint16_t inputValue)
 {
 	ErrorStatus state;
 	// A temp array to hold results of conversion
-  char value[10];
+	char value[10];
 	
 	// Loop index
-  int i = 0;
-  do
-  {
+	int i = 0;
+	do
+	{
 		// Convert integer to character
-    value[i++] = (char)(inputValue % 10) + '0';
-    inputValue /= 10;
-  } while(inputValue);
+		value[i++] = (char)(inputValue % 10) + '0';
+		inputValue /= 10;
+	} while(inputValue);
 	
-  // Send data
-  while(i)
-  {
-    state = usartPutC(USARTx, value[--i]); 
-  }
+	// Send data
+	while(i)
+	{
+		state = usartPutC(USARTx, value[--i]); 
+	}
 	return state;
 }
