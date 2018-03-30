@@ -264,7 +264,10 @@ void timDeinit(TIM_TypeDef* TIMx)
 void timEnable(TIM_TypeDef* TIMx)
 {
 	timClearStatusRegister(TIMx);
-	TIMx->CR1 |= TIM_CR1_CEN;
+	if (!(TIMx->CR1 & TIM_CR1_CEN))
+	{
+		TIMx->CR1 |= TIM_CR1_CEN;
+	}
 	return;
 }
 
