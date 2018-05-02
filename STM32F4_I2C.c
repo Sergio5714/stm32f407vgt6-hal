@@ -37,8 +37,8 @@ void I2CInit(I2C_Module_With_State_Typedef* I2Cx)
 	// Standard Mode, ~100 kHz
 	I2Cx->module->CCR |= I2C_CCR_FS;
 	//I2Cx->CCR |= I2C_CCR_DUTY;
-	//I2Cx->CCR |= (uint32_t) ceil(GLOBAL_CORE_FREQUENCY * 1000 / rccGetApb1Prescaler() / 25 / 400);
-	I2Cx->module->CCR |= (uint32_t) ceil(GLOBAL_CORE_FREQUENCY * 1000 / rccGetApb1Prescaler()/ 3 / 100);
+	//I2Cx->CCR |= (uint32_t) ceil(GLOBAL_CORE_FREQUENCY * 1000 / rccGetApb1Prescaler() / 25 / 300);
+	I2Cx->module->CCR |= (uint32_t) ceil(GLOBAL_CORE_FREQUENCY * 1000 / rccGetApb1Prescaler()/ 3 / 300);
 	
 	//Speed of signal's rising
 	I2Cx->module->TRISE = 15;
@@ -64,6 +64,10 @@ void I2CDisable(I2C_TypeDef* I2Cx)
 // Reset I2C bus
 void I2CReset(I2C_Module_With_State_Typedef* I2Cx)
 {	
+	// Generate stop condition
+	I2CStop(I2CModule.module);
+	I2CWaitForStopToBeCleared(&I2CModule);
+	
 	// Reset
 	I2Cx->module->CR1|=I2C_CR1_SWRST;
 	I2Cx->module->CR1^=I2C_CR1_SWRST;
@@ -76,6 +80,9 @@ void I2CReset(I2C_Module_With_State_Typedef* I2Cx)
 	
 	// Enable
 	I2CEnable(I2Cx->module);
+	
+	// Return active status
+	I2Cx->status = I2C_ACTIVE_MODE;
 
 	return;
 }
@@ -91,7 +98,6 @@ void I2CCheckBus(I2C_Module_With_State_Typedef* I2Cx)
 	{
 		// Reset I2C bus
 		I2CReset(I2Cx);
-		I2Cx->status = I2C_ACTIVE_MODE;
 	}
 	return;
 }
@@ -161,10 +167,16 @@ static I2C_Status_Typedef I2CStart(I2C_Module_With_State_Typedef* I2Cx)
 	{
 		if (I2Cx->status != I2C_ACTIVE_MODE)
 		{
+			// Generate stop condition
+			I2CStop(I2CModule.module);
+			I2CWaitForStopToBeCleared(&I2CModule);
 			return I2Cx->status;
 		}
-		if (checkTimeout(startTime, I2C_TIMEOUT_VALUE_MS))
+		if (checkTimeout(startTime, I2C_TIMEOUT_VALUE_TENTH_OF_MS))
 		{
+			// Generate stop condition
+			I2CStop(I2CModule.module);
+			I2CWaitForStopToBeCleared(&I2CModule);
 			I2Cx->status = I2C_TIMEOUT_ERROR;
 			return I2C_TIMEOUT_ERROR;
 		}
@@ -188,10 +200,16 @@ static I2C_Status_Typedef I2CSendAddr(I2C_Module_With_State_Typedef* I2Cx, uint8
 	{
 		if (I2Cx->status != I2C_ACTIVE_MODE)
 		{
+			// Generate stop condition
+			I2CStop(I2CModule.module);
+			I2CWaitForStopToBeCleared(&I2CModule);
 			return I2Cx->status;
 		}
-		if (checkTimeout(startTime, I2C_TIMEOUT_VALUE_MS))
+		if (checkTimeout(startTime, I2C_TIMEOUT_VALUE_TENTH_OF_MS))
 		{
+			// Generate stop condition
+			I2CStop(I2CModule.module);
+			I2CWaitForStopToBeCleared(&I2CModule);
 			I2Cx->status = I2C_TIMEOUT_ERROR;
 			return I2C_TIMEOUT_ERROR;
 		}
@@ -209,10 +227,16 @@ static I2C_Status_Typedef I2CWaitForByte(I2C_Module_With_State_Typedef* I2Cx)
 	{
 		if (I2Cx->status != I2C_ACTIVE_MODE)
 		{
+			// Generate stop condition
+			I2CStop(I2CModule.module);
+			I2CWaitForStopToBeCleared(&I2CModule);
 			return I2Cx->status;
 		}
-		if (checkTimeout(startTime, I2C_TIMEOUT_VALUE_MS))
+		if (checkTimeout(startTime, I2C_TIMEOUT_VALUE_TENTH_OF_MS))
 		{
+			// Generate stop condition
+			I2CStop(I2CModule.module);
+			I2CWaitForStopToBeCleared(&I2CModule);
 			I2Cx->status = I2C_TIMEOUT_ERROR;
 			return I2C_TIMEOUT_ERROR;
 		}
@@ -230,10 +254,16 @@ static I2C_Status_Typedef I2CWaitForBTF(I2C_Module_With_State_Typedef* I2Cx)
 	{
 		if (I2Cx->status != I2C_ACTIVE_MODE)
 		{
+			// Generate stop condition
+			I2CStop(I2CModule.module);
+			I2CWaitForStopToBeCleared(&I2CModule);
 			return I2Cx->status;
 		}
-		if (checkTimeout(startTime, I2C_TIMEOUT_VALUE_MS))
+		if (checkTimeout(startTime, I2C_TIMEOUT_VALUE_TENTH_OF_MS))
 		{
+			// Generate stop condition
+			I2CStop(I2CModule.module);
+			I2CWaitForStopToBeCleared(&I2CModule);
 			I2Cx->status = I2C_TIMEOUT_ERROR;
 			return I2C_TIMEOUT_ERROR;
 		}
@@ -253,7 +283,7 @@ static I2C_Status_Typedef I2CWaitForStopToBeCleared(I2C_Module_With_State_Typede
 		{
 			return I2Cx->status;
 		}
-		if (checkTimeout(startTime, I2C_TIMEOUT_VALUE_MS))
+		if (checkTimeout(startTime, I2C_TIMEOUT_VALUE_TENTH_OF_MS))
 		{
 			I2Cx->status = I2C_TIMEOUT_ERROR;
 			return I2C_TIMEOUT_ERROR;
@@ -271,10 +301,16 @@ static I2C_Status_Typedef I2CWaitBusyLine(I2C_Module_With_State_Typedef* I2Cx)
 	{
 		if (I2Cx->status != I2C_ACTIVE_MODE)
 		{
+			// Generate stop condition
+			I2CStop(I2CModule.module);
+			I2CWaitForStopToBeCleared(&I2CModule);
 			return I2Cx->status;
 		}
-		if (checkTimeout(startTime, I2C_TIMEOUT_VALUE_MS))
+		if (checkTimeout(startTime, I2C_TIMEOUT_VALUE_TENTH_OF_MS))
 		{
+			// Generate stop condition
+			I2CStop(I2CModule.module);
+			I2CWaitForStopToBeCleared(&I2CModule);
 			I2Cx->status = I2C_TIMEOUT_ERROR;
 			return I2C_TIMEOUT_ERROR;
 		}
@@ -472,7 +508,6 @@ void I2CSearch(I2C_Module_With_State_Typedef* I2Cx)
 		I2CWaitForStopToBeCleared(I2Cx);
 		if (checkTimeout(startTime, 1))
 		{
-			uint8_t device = address;
 		}
 		address--;
 		
