@@ -22,6 +22,9 @@ void I2CInit(I2C_Module_With_State_Typedef* I2Cx)
 	{
 		RCC->APB1ENR |= RCC_APB1ENR_I2C3EN;
 	}
+	// Software reset
+	//I2Cx->module->CR1|=I2C_CR1_SWRST;
+	//I2Cx->module->CR1^=I2C_CR1_SWRST;
 
 	// Writing frequency of APB to CR2 register
 	I2Cx->module->CR2 &= ~I2C_CR2_FREQ;
@@ -64,22 +67,60 @@ void I2CDisable(I2C_TypeDef* I2Cx)
 // Reset I2C bus
 void I2CReset(I2C_Module_With_State_Typedef* I2Cx)
 {	
-	// Generate stop condition
-	I2CStop(I2CModule.module);
-	I2CWaitForStopToBeCleared(&I2CModule);
+	// 1.0 Disable I2C
+	I2CDisable(I2Cx->module);
 	
-	// Reset
+	// 2.0 Configure the SCL and SDA as general purpose Output open drain (HIGH level)
+	
+	// Initialization for SDA and SCL pins as open drain high
+	gpioInitPin(I2C_MODULE_SCL_PIN_PORT, I2C_MODULE_SCL_PIN_NUMBER, GPIO_MODE_OUT, GPIO_OUTPUT_MODE_OD, GPIO_PUPD_NOPULL);
+	gpioPinSetLevel(I2C_MODULE_SCL_PIN_PORT, I2C_MODULE_SCL_PIN_NUMBER, GPIO_LEVEL_HIGH);
+	gpioInitPin(I2C_MODULE_SDA_PIN_PORT, I2C_MODULE_SDA_PIN_NUMBER, GPIO_MODE_OUT, GPIO_OUTPUT_MODE_OD, GPIO_PUPD_NOPULL);
+	gpioPinSetLevel(I2C_MODULE_SDA_PIN_PORT, I2C_MODULE_SDA_PIN_NUMBER, GPIO_LEVEL_HIGH);
+	
+	// 3.0 Check SCL and SDA High level
+	delayInTenthOfMs(0x03);
+	
+	// 4.0 Configure the SDA low level
+	gpioPinSetLevel(I2C_MODULE_SDA_PIN_PORT, I2C_MODULE_SDA_PIN_NUMBER, GPIO_LEVEL_LOW);
+	
+	// 5.0 Check SDA Low level
+	delayInTenthOfMs(0x03);
+	
+	// 6.0 Configure the SCL low level
+	gpioPinSetLevel(I2C_MODULE_SCL_PIN_PORT, I2C_MODULE_SCL_PIN_NUMBER, GPIO_LEVEL_LOW);
+	
+	// 7.0 Check SCL Low level
+	delayInTenthOfMs(0x03);
+	
+	// 8.0 Configure the SCL high level
+	gpioPinSetLevel(I2C_MODULE_SCL_PIN_PORT, I2C_MODULE_SCL_PIN_NUMBER, GPIO_LEVEL_HIGH);
+	
+	// 9.0 Check SCL high level
+	delayInTenthOfMs(0x03);
+	
+	// 10.0 Configure the SDA high level
+	gpioPinSetLevel(I2C_MODULE_SDA_PIN_PORT, I2C_MODULE_SDA_PIN_NUMBER, GPIO_LEVEL_HIGH);
+	
+	// 11.0 Check SDA high level
+	delayInTenthOfMs(0x03);
+	
+	// 12.0 Configure SCL and SDA alternative function open drain
+	gpioInitPinAf(I2C_MODULE_SCL_PIN_PORT, I2C_MODULE_SCL_PIN_NUMBER, I2C_MODULE_PIN_AF);
+	gpioInitPinAf(I2C_MODULE_SDA_PIN_PORT, I2C_MODULE_SDA_PIN_NUMBER, I2C_MODULE_PIN_AF);
+	
+	// 13.0 Set SWRST and then clear it
 	I2Cx->module->CR1|=I2C_CR1_SWRST;
 	I2Cx->module->CR1^=I2C_CR1_SWRST;
+	
+	// Enable
+	I2CEnable(I2Cx->module);
 	
 	// Init
 	I2CInit(I2Cx);
 	
 	// Remeber time of last reset
 	I2Cx->timeOfLastI2CResetMillis = getLocalTime();
-	
-	// Enable
-	I2CEnable(I2Cx->module);
 	
 	// Return active status
 	I2Cx->status = I2C_ACTIVE_MODE;
