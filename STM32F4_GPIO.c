@@ -61,24 +61,17 @@ void gpioInitPin(GPIO_TypeDef* GPIOx,  GPIO_Pin_Number_Typedef  GPIO_Pin, GPIO_M
 	
 	// Initialization of pin's mode
 	
-	// Delete all necessary bits of MODERx
-	GPIOx->MODER &= ~(GPIO_Pin || (GPIO_Pin << 1));
-	
-	// Write appropriate bits to MODERx to set mode
-	GPIOx->MODER |= GPIO_Mode << (GPIO_Pin * 2); 
+	// Delete all necessary bits of MODERx and Write appropriate bits to MODERx to set mode
+	GPIOx->MODER = (GPIOx->MODER & ~(GPIO_MODER_MODE0_Msk << (GPIO_Pin * 2))) | (GPIO_Mode << (GPIO_Pin * 2));
 	
 	// Pull up and pull down resistors
-	GPIOx->PUPDR &= ~(GPIO_PUPDR_PUPDR0 << (GPIO_Pin * 2));
-	GPIOx->PUPDR |= (GPIO_PuPd_Mode << (GPIO_Pin * 2));
+	GPIOx->PUPDR = (GPIOx->PUPDR & ~(GPIO_PUPDR_PUPDR0 << (GPIO_Pin * 2))) | (GPIO_PuPd_Mode << (GPIO_Pin * 2));
 	
 	// Initialization of output mode
 	if ((GPIO_Mode == GPIO_MODE_OUT) || (GPIO_Mode == GPIO_MODE_AF))
 	{
-		// Clear bit
-		GPIOx->OTYPER &= ~(1 << GPIO_Pin);
-		
-		// Set bit
-		GPIOx->OTYPER |= (GPIO_Output_Mode) << (GPIO_Pin);
+		// Clear bit and set bit
+		GPIOx->OTYPER = (GPIOx->OTYPER & ~(1 << GPIO_Pin)) | ((GPIO_Output_Mode) << (GPIO_Pin));
 	}
 	return;
 }
@@ -90,25 +83,19 @@ void gpioInitPinAf(GPIO_TypeDef* GPIOx,  GPIO_Pin_Number_Typedef  GPIO_Pin, uint
 	// Initialization of a clock
 	gpioInitClock(GPIOx);
 	
-	// Write appropriate bits to MODERx
-	GPIOx->MODER |= GPIO_MODE_AF << (GPIO_Pin * 2); 
+	// Clear and Write appropriate bits to MODERx
+	GPIOx->MODER = (GPIOx->MODER & ~(GPIO_MODER_MODE0_Msk << (GPIO_Pin * 2))) | (GPIO_MODE_AF << (GPIO_Pin * 2)); 
 	
 	// Selection of Alternative function
 	if (GPIO_Pin <= 7 )
 	{
-		// Clear bits for AF
-		GPIOx->AFR[0] &= ~(15 << (GPIO_Pin * 4));
-		
-		// Write appropriate bits
-		GPIOx->AFR[0] |= GPIO_AF_Number << (GPIO_Pin * 4);
+		// Clear bits for AF and write appropriate bits
+		GPIOx->AFR[0] = (GPIOx->AFR[0] & ~(15 << (GPIO_Pin * 4))) | (GPIO_AF_Number << (GPIO_Pin * 4));
 	}
 	else if (GPIO_Pin > 7 )
 	{
-		// Clear bits for AF
-		GPIOx->AFR[1] &= ~(15 << ((GPIO_Pin - 8) * 4));
-		
-		// Write appropriate bits
-		GPIOx->AFR[1] |= GPIO_AF_Number << ((GPIO_Pin - 8) * 4);
+		// Clear bits for AF and write appropriate bits
+		GPIOx->AFR[1] = (GPIOx->AFR[1] & ~(15 << ((GPIO_Pin - 8) * 4))) | GPIO_AF_Number << ((GPIO_Pin - 8) * 4);
 	}
 	return;
 }
