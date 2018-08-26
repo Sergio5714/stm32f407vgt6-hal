@@ -40,8 +40,8 @@ void I2CInit(I2C_Module_With_State_Typedef* I2Cx)
 	// Standard Mode, ~100 kHz
 	I2Cx->module->CCR |= I2C_CCR_FS;
 	//I2Cx->CCR |= I2C_CCR_DUTY;
-	//I2Cx->CCR |= (uint32_t) ceil(GLOBAL_CORE_FREQUENCY * 1000 / rccGetApb1Prescaler() / 25 / 300);
-	I2Cx->module->CCR |= (uint32_t) ceil(GLOBAL_CORE_FREQUENCY * 1000 / rccGetApb1Prescaler()/ 3 / 300);
+	//I2Cx->CCR |= (uint32_t) ceil(GLOBAL_CORE_FREQUENCY * 1000 / rccGetApb1Prescaler() / 25 / 100);
+	I2Cx->module->CCR |= (uint32_t) ceil(GLOBAL_CORE_FREQUENCY * 1000 / rccGetApb1Prescaler()/ 3 / 100);
 	
 	//Speed of signal's rising
 	I2Cx->module->TRISE = 15;
@@ -403,7 +403,6 @@ ErrorStatus I2CSendBytes(I2C_Module_With_State_Typedef* I2Cx, uint8_t* bytesArra
 	return SUCCESS;
 }
 
-
 // Read predefined number of bytes
 ErrorStatus I2CReadBytes(I2C_Module_With_State_Typedef* I2Cx, uint8_t* readBuffer, uint32_t numberOfBytesToBeRead, uint8_t SlaveAddr)
 {
@@ -443,7 +442,7 @@ ErrorStatus I2CReadBytes(I2C_Module_With_State_Typedef* I2Cx, uint8_t* readBuffe
 	{
 		I2CSetAck(I2Cx->module);
 		I2CSetPOS(I2Cx->module);
-		if(I2CStart(I2Cx) != SUCCESS)
+		if(I2CStart(I2Cx) != I2C_ACTIVE_MODE)
 		{
 			return ERROR;
 		}

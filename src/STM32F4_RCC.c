@@ -73,7 +73,7 @@ uint16_t rccGetAhbPrescaler()
 // Set maximum clock speed that equals 168 MHz 
 void SystemClockInitHse168Mhz()
 {
-		// Turn on external oscillator
+	// Turn on external oscillator
 	RCC->CR |= RCC_CR_HSEON;
 	
 	// Waiting for HSE to be ready

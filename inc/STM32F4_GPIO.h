@@ -93,6 +93,13 @@ typedef struct
 #define GPIO_AF_I2C2          ((uint8_t)0x04)  // I2C2 alternative function  
 #define GPIO_AF_I2C3          ((uint8_t)0x04)  // I2C3 alternative function   
 
+// AF 5 selection   
+#define GPIO_AF_SPI1          ((uint8_t)0x05)  // SPI1 alternative function  
+#define GPIO_AF_SPI2          ((uint8_t)0x05)  // SPI2 alternative function 
+
+// AF 6 selection   
+#define GPIO_AF_SPI3          ((uint8_t)0x06)  // SPI3 alternative function  
+
 // AF 7 selection    
 #define GPIO_AF_USART1        ((uint8_t)0x07)  // USART1 alternative function  
 #define GPIO_AF_USART2        ((uint8_t)0x07)  // USART2 alternative function  
